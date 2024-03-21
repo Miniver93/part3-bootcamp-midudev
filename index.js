@@ -1,9 +1,34 @@
 const express=require('express') //Importamos el modulo express
 
+const morgan=require('morgan')
+
+
 const app=express(); //Creamos el servidor
 
-app.use(express.json())
+    //Creamos un token que luego le añadiremos a nuestro middleware, que contenga un mensaje personalizado según el código que nos de
+    morgan.token('message', (request,response)=>{
+        if(response.statusCode===400){
+            return JSON.stringify({
+                "error": "The name already exist in the phonebook"
+              })
+        }
+        return JSON.stringify(request.body)
+    })
 
+app.use(morgan((tokens, request, response)=>{
+    return[
+        tokens.method(request,response),
+        tokens.url(request,response),
+        tokens.status(request,response),
+        tokens.res(request,response, 'content-length'), '-',
+        tokens['response-time'](request, response), 'ms',
+        //Aquí añado mi token personalizado y le digo que se ejecute estoy haciendo una llamada POST, si no existe escribeme ''
+        request.method==='POST' ? tokens.message(request,response) : '',
+    ].join(' ')
+}))
+
+
+app.use(express.json())
 
 let persons=[
     { 
@@ -63,6 +88,8 @@ app.delete('/api/persons/:id', (request,response)=>{
 app.post('/api/persons', (request,response)=>{
     const person=request.body
     const personNames=persons.map(person=>person.name)
+
+
     
     if (!person || !person.name || !person.number) {
         return response.status(400).json({
@@ -79,8 +106,6 @@ app.post('/api/persons', (request,response)=>{
         number: person.number
     }
 
-    
-
 
     if(personNames.includes(person.name)){
         return response.status(400).json({
@@ -92,6 +117,7 @@ app.post('/api/persons', (request,response)=>{
     }
     
 })
+
 
 
 const PORT=3001
