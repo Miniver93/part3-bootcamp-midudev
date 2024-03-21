@@ -5,7 +5,7 @@ const app=express(); //Creamos el servidor
 app.use(express.json())
 
 
-const persons=[
+let persons=[
     { 
       "id": 1,
       "name": "Arto Hellas", 
@@ -52,6 +52,12 @@ app.get('/api/persons/:id', (request, response)=>{
     }
 
     
+})
+
+app.delete('/api/persons/:id', (request,response)=>{
+    const id=Number(request.params.id)
+    persons=persons.filter(pid=> pid.id !== id) //Sobreescribeme todos los elementos de mis phonebook, excepto el que no quiero
+    response.status(204).end()
 })
 
 
