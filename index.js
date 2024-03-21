@@ -62,10 +62,11 @@ app.delete('/api/persons/:id', (request,response)=>{
 
 app.post('/api/persons', (request,response)=>{
     const person=request.body
+    const personNames=persons.map(person=>person.name)
     
     if (!person || !person.name || !person.number) {
         return response.status(400).json({
-            error: "No number phone"
+            error: "No name or phone"
         })
     }
 
@@ -78,8 +79,18 @@ app.post('/api/persons', (request,response)=>{
         number: person.number
     }
 
-    persons=[...persons, newPhone]
-    response.status(201).json(newPhone)
+    
+
+
+    if(personNames.includes(person.name)){
+        return response.status(400).json({
+            error: "The name already exist in the phonebook"
+        })
+    }else{
+        response.status(201).json(newPhone)
+        persons=[...persons, newPhone]
+    }
+    
 })
 
 
