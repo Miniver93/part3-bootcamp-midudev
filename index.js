@@ -1,4 +1,8 @@
-const express=require('express') //Importamos el modulo express
+const express=require('express'); //Importamos el modulo express
+
+
+const fs=require('fs');
+
 
 const morgan=require('morgan')
 
@@ -28,30 +32,25 @@ app.use(morgan((tokens, request, response)=>{
 }))
 
 
-app.use(express.json())
+app.use(express.json()) //Le decimos que mi app use el middleware para parsear JSON
 
-let persons=[
-    { 
-      "id": 1,
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": 2,
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": 3,
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": 4,
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
+let persons
+//Aquí leo mi archivo json, le paso por parámetros la ruta, el códificador, si no lo asigno devolverá números y un callback
+fs.readFile('./phonebook.json', 'utf8' ,(error,data)=>{
+    
+    if (error) { //Como el archivo lo que me devuelve es un string, tengo que parsear este string en un objeto json
+        console.error("Cannot read JSON file",error);
+        return;
     }
-]
+    try {
+        persons=JSON.parse(data) //Como el archivo lo que me devuelve es un string, tengo que parsear este string en un objeto json y después de parsearlo lo almaceno en persons, donde contendrá mi agenda
+        console.log("JSON file read successfully");
+
+    } catch (parseError) {
+        console.error("Error parsing JSON:", parseError);
+    }
+})
+
 
 app.get('/api/persons', (request,response)=>{
     response.send(persons)
@@ -114,6 +113,13 @@ app.post('/api/persons', (request,response)=>{
     }else{
         response.status(201).json(newPhone)
         persons=[...persons, newPhone]
+
+        //Una vez añadido a personas el nuevo numero, tengo que escribir todos los numeros que tengo ahora mismo en mi agenda
+        fs.writeFile('./phonebook.json', JSON.stringify(persons), (error)=>{
+            if (error) {
+                console.log("Cannot write file");
+            }
+        })
     }
     
 })
