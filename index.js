@@ -60,6 +60,28 @@ app.delete('/api/persons/:id', (request,response)=>{
     response.status(204).end()
 })
 
+app.post('/api/persons', (request,response)=>{
+    const person=request.body
+    
+    if (!person || !person.name || !person.number) {
+        return response.status(400).json({
+            error: "No number phone"
+        })
+    }
+
+    const ids=persons.map(person=>person.id)
+    const maxIds=Math.max(...ids)
+
+    const newPhone={
+        id: maxIds + 1,
+        name: person.name,
+        number: person.number
+    }
+
+    persons=[...persons, newPhone]
+    response.status(201).json(newPhone)
+})
+
 
 const PORT=3001
 app.listen(PORT,()=>{
