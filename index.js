@@ -32,6 +32,7 @@ app.use(morgan((tokens, request, response)=>{
 }))
 
 
+app.use(express.static('dist'))
 app.use(express.json()) //Le decimos que mi app use el middleware para parsear JSON
 
 let persons
